@@ -4,13 +4,17 @@ services:
     image: confluentinc/cp-zookeeper:5.3.0-1 
     container_name: zookeeper 
     restart: unless-stopped 
-    network_mode: host 
+    network_mode: host
+    ports:
+      - '2181:2181'
 
     #volumes:
       #- /var/lib/zookeeper/data:/var/lib/zookeeper/data 
       #- /var/lib/zookeeper/log:/var/lib/zookeeper/log 
       #- /var/log/zookeeper:/var/log/zookeeper 
     environment:
+      ZOOKEEPER_SERVER_ID: 1 
+      ZOOKEEPER_CLIENT_PORT: 2181
       KAFKA_HEAP_OPTS: '-Xms512g - Xmx152g' 
       KAFKA_JMV_OPTS: '-Djava.rmi.server.hostname=202.51.74.184
       -Dcom.sun.management.jmxremote=true 
@@ -19,6 +23,5 @@ services:
       -Dcom.sun.management.jmxremote.authenticate=false 
       -Dcom.sun.management.jmxremote.ssl=false'
       ZOOKEEPER_TICK_TIME: 2000 
-      ZOOKEEPER_SERVER_ID: 1 
-      ZOKEEPER_SERVERS: 202.51.74.184:2888:3888;192.2.0.12:2888:3888;192.2.0.13:2888:3888
+      ZOKEEPER_SERVERS: 202.51.74.184:2181:2181;192.2.0.12:2888:3888;192.2.0.13:2888:3888
       
