@@ -15,7 +15,7 @@ services:
     environment:
       ZOOKEEPER_SERVER_ID: 1 
       ZOOKEEPER_CLIENT_PORT: 2181
-      KAFKA_HEAP_OPTS: '-Xms512m -Xmx512m' 
+      KAFKA_HEAP_OPTS: '-Xms300m -Xmx300m' 
       KAFKA_JMV_OPTS: '-Djava.rmi.server.hostname=202.51.74.184 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
       ZOOKEEPER_TICK_TIME: 2000 
       ZOOKEEPER_SERVERS: 202.51.74.184:2181:2181
