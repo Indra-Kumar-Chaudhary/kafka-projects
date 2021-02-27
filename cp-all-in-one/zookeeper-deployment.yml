@@ -7,12 +7,12 @@ services:
     network_mode: host 
 
     volumes:
-      - /var/lib/zookeeper/data:/var/lib/zookeeper/data 
-      - /var/lib/zookeeper/log:/var/lib/zookeeper/log 
-      - /var/log/zookeeper:/var/log/zookeeper 
+      #- /var/lib/zookeeper/data:/var/lib/zookeeper/data 
+      #- /var/lib/zookeeper/log:/var/lib/zookeeper/log 
+      #- /var/log/zookeeper:/var/log/zookeeper 
     environment:
-      KAFKA_HEAP_OPTS: '-Xms2g - Xmx2g' 
-      KAFKA_JMV_OPTS: '-Djava.rmi.server.hostname=192.2.0.11
+      KAFKA_HEAP_OPTS: '-Xms512g - Xmx152g' 
+      KAFKA_JMV_OPTS: '-Djava.rmi.server.hostname=202.51.74.184
       -Dcom.sun.management.jmxremote=true 
       -Dcom.sun.management.jmxremote.port=10020 
       -Dcom.sun.management.jmxremote.local.only=false 
@@ -20,5 +20,5 @@ services:
       -Dcom.sun.management.jmxremote.ssl=false'
       ZOOKEEPER_TICK_TIME: 2000 
       ZOOKEEPER_SERVER_ID: 1 
-      ZOKEEPER_SERVERS: 192.2.0.11:2888:3888;192.2.0.12:2888:3888;192.2.0.13:2888:3888
+      ZOKEEPER_SERVERS: 202.51.74.184:2888:3888;192.2.0.12:2888:3888;192.2.0.13:2888:3888
       

@@ -12,3 +12,5 @@ services:
       APPLICATION_SECRET: 'mySecret'
     
     command: -Dpidfile.path=/dev/null 
+  
+    
