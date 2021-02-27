@@ -7,9 +7,9 @@ services:
     network_mode: bridge 
     ports:
       - '9000:9000' 
-    enviroment:
+    environment:
       ZK_HOSTS: '202.51.74.184:2181' 
-      #APPLICATION_SECRET: "mySecret"
+      APPLICATION_SECRET: "mySecret"
     
     command: -Dpidfile.path=/dev/null 
   
