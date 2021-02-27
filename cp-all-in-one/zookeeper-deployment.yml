@@ -23,5 +23,5 @@ services:
       -Dcom.sun.management.jmxremote.authenticate=false 
       -Dcom.sun.management.jmxremote.ssl=false'
       ZOOKEEPER_TICK_TIME: 2000 
-      ZOKEEPER_SERVERS: 202.51.74.184:2181:2181;192.2.0.12:2888:3888;192.2.0.13:2888:3888
+      ZOOKEEPER_SERVERS: 202.51.74.184:2181:2181
       
