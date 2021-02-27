@@ -1,0 +1,267 @@
+# ZOOKEEPER docker-compose.yml 
+
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.3.0-1
+    container_name: zookeeper
+    restart: unless-stopped
+    network_mode: host  volumes:
+      - /var/lib/zookeeper/data:/var/lib/zookeeper/data
+      - /var/lib/zookeeper/log:/var/lib/zookeeper/log
+      - /var/log/zookeeper:/var/log/zookeeperenvironment:
+      KAFKA_HEAP_OPTS: '-Xms2g -Xmx2g'
+      KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=192.2.0.11 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10020 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_SERVERS: 192.2.0.11:2888:3888;192.2.0.12:2888:3888;192.2.0.13:2888:3888
+
+
+
+#The Cotainer Image: 
+Cofluent maintains a distribution of Zookeeper, as part of the Confluent Platform. To use this container specify as the image as: 
+ image: confluentinc/cp-zookeeper:5.3.0-1 
+
+It is important that Zookeeper always be running. To help ensure this, the restart policy is configured to automatically restart container unless it as 
+been specifically stopped. 
+
+restart: unless-stopped 
+
+For applications that will be long running on a dedicated server I prefer to use the host network mode. This provides for better network throughput and reduced latency. 
+
+network_mode: host 
+
+# Persistent Data Storage 
+There are a few options for storing persistent data. My preference is to use bind mounts to mount a path on the underlying host to a path within the container. This is done for the various data and log directories. 
+
+volumes:
+    - /var/lib/zookeeper/data:/var/lib/zookeeper/data 
+    - /var/lib/zookeeper/log:/var/lib/zookeeper/log 
+    - /var/log/zookeeper:/var/log/zookeeper 
+
+# JVM HEAP SIZE 
+The Zookeeper documentation recommends the following to set the JVM heap size. 
+
+To determine the correct value, use load tests, and make sure you are well below the uses limit that would cause you to swap. Be conservative --use a maximum heap size of 3GB for a 4GB machine 
+For most of the use-cases I have worked with 2GB of JVM heap has worked well 
+
+KAFKA_HEAP_OPTS: '-Xms2g -Xmx2g' 
+
+# JVM Options 
+The Confluent Zookeeper containers also allows option settings for JMX to be passed the Java JVM 
+
+KAFKA_JMX_OPTS: 'Djava.rmi.server.hostname=192.2.0.11 
+-Dcom.sun.management.jmxremote=true 
+-Dcom.sun.management.jmxremote.port=10020 
+-Dcom.sun.management.jmxremote.local.only=false 
+-Dcom.sun.management.jmxremote.authenticate=false 
+-Dcom.sun.management.jmxremote.ssl=false'
+
+The above example sets hostname to the IP address where Zookeeper is listening, as well as the part on which to listen for JMX requests. Additional security-related options can also be configured. 
+
+# Tick Time 
+Tick Time is the length of a single tick, which is the basic time unit used by Zookeeper, as measured in milliseconds. It is used to regulate heartbeats and timeouts. 
+
+ZOOKEEPER_TICK_TIME: 2000
+
+For example, the minimum session timeout will be two ticks, or 4000ms given the above tick time setting of 2000ms 
+
+# ZOOKEEPER Server ID 
+The server ID must be unique within the ensemble and should have a value between 1 and 255 
+
+ZOOKEEPER_SERVER_ID: 1 
+
+Each Zookeeper server in ensemble must have a different ID. Setting up a three node ensemble means you will have IDs of 1, 2, & 3.  
+
+# ZOOKEEPER ENSEMBLE 
+As mentioned earlier, every Zookeeper server must be aware of the other servers in the ensemble. This is specified as follows: 
+
+ZOOKEEPER_SERVERS: 
+192.2.0.11:2888:3888;192.2.0.12:2888:3888;192.2.0.13:2888:3888
+
+# RUNNING ZOOKEEPER 
+You will need a docker-compose.yml file for each server where ZOOKEEPER will be run. These files should be identical with the exception of the 
+Djava.rmi.server.hostname value of the KAFKA_JMX_OPTS environment variable, and the value of ZOOKEEPER_SERVER_ID. 
+
+Zookeeper is then started using docker-compose as follows: 
+
+docker-compose -f PATH/TO/zookeeper/docker-compose.yml up -d 
+
+The -d flag will cause the container to be run in the background as daemon. 
+
+
+
+# DEPLOYING KAFKA BROKERS 
+docker-compose.yml 
+
+similar to the deployment of Zookeeper, as docker-compose.yml file will be used to deploy and run Kafka on each node. 
+
+version: '3'
+services:
+  kafka:
+    image: confluentinc/cp-kafka:5.3.0-1
+    container_name: kafka
+    restart: unless-stopped
+    network_mode: host    volumes:
+      - /var/lib/kafka/data:/var/lib/kafka/data
+      - /var/log/kafka:/var/log/kafka    environment:
+      KAFKA_HEAP_OPTS: '-Xms4g -Xmx4g'
+      KAFKA_JMX_OPTS: '-Djava.rmi.server.hostname=192.2.0.21 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=10030 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false'
+
+      KAFKA_BROKER_ID: 0
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.2.0.21:9092     
+      KAFKA_ZOOKEEPER_CONNECT: 192.2.0.11:2181;192.2.0.12:2181;192.2.0.13:2181
+      KAFKA_LOG_RETENTION_HOURS: 768
+      #KAFKA_LOG_RETENTION_BYTES: 1073741824
+      #KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_NUM_PARTITIONS: 6
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 2
+
+
+Similar to Zookeeper, the Confluet provided Kafka images is used. The restart policy, host network mode and use of bind mounted volumes is also leveraged. 
+
+KAFKA_JMX_OPTS is also used to configure JMX settings. 
+
+#JVM Heap Size 
+Confluent's document makes the statement regarding JVM heap size: 
+kafka uses heap space very carefully and does not require setting heap sizes more than 6 GB. 
+
+FOR most use-cases I have been successful with 4GB of JVM heap 
+
+KAFKA_HEAP_OPTS: '-Xms4g -Xmx4g' 
+
+# BROKER ID 
+The ID of the broker. This must be set to a unique iteger for each broker. 
+
+KAFKA_BROKER_ID: 0 
+
+Each Kafka broker in the cluster must have a different ID. Setting up a three node cluster means you will have IDs of 0, 1 & 2. 
+
+# Listerners 
+As Kafka is running within the container, it is easiest to configure Kafka to listen on all IPs. 
+KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092 
+
+A Kafka broker will advertise to producers and consumers the IP address/hostname and port that it is listening on. If not set,
+it uses the value for 'listeners'. However, since Kafka is listening on all IP's, the advertised listener is set explicitly to the host IP that we want to advertised. 
+
+KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.2.0.21:9092 
+
+# Connection to Zookeeper 
+As Kafka leverages Zookeeper for the coordination of many functions, we need to point the kafka broker to the instances that make up the Zookeeper ensemble 
+KAFKA_ZOOKEEPER_CONNECT: 192.2.0.11:2181,192.2.0.12:2181,192.2.0.13:2181 
+
+
+# Data Retention 
+Kafka provides a number of settings to specify how long data is stored persistently. This will generally be for either a specified time period, or alternatively a volume of data in bytes. 
+
+To limit retention to a specified number of hours, set 
+KAFKA_LOG_RETENTION_HOURS. This specifies the minimum age of log file to be eligible for deletion due to age. 
+
+KAFKA_LOG_RETENTION_HOURS: 768 
+
+Alternatively KAFKA_LOG_RETENTIOn_BYTES: 1073741824 
+
+It is also possible to configure the interval at which log segments are checked to see if they can be deleted. 
+KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000 
+
+# TOPIC AUTO-CREATION 
+Kafka can be configured to create new topics automatically when a producer first attempts to write to an non-existing topic. This can be useful in many lab, development or testing environments, but often disabled in production. 
+
+The auto-creation of topics is enabled by setting the following environment variable. 
+
+KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+
+
+# DEFAULT NUMBER OF TOPIC PARTITIONS 
+If the number of partitions is not specified when a topic is created, the default number of log partitions per topic is used. 
+This value is specified as follows: 
+
+KAFKA_NUM_PARTITIONS: 6 
+
+# DEFAULT TOPIC Replication Factor 
+Similar to the number of partitions, the default replication factor for automatically created topics can also be configured. 
+
+KAFKA_DEFAULT_REPLICATION_FACTOR: 2 
+
+# RUNNING THE KAFKA BROKERS 
+You will need a docker-compose.yml file for each server where a Kafka broker will be run. 
+These files should be identical with the exception of the Djava.rmi.server.hostname value of the KAFKA_JMX_OPTS environment 
+variable, the value of KAFKA_BROKER_ID and the value of KAFKA_ADVERTISED_LISTENERS. 
+
+Kafka is then started using docker-compose as follows: 
+
+docker-compose -f PATH/TO/kafka/docker-compose.yml up -d 
+
+The -d flag will cause the container to be run in the background as a daemon. 
+
+
+
+# Kafka Manager 
+While not provided by Confluent, Kafka Manager provides a convenient web-based UI for many 
+Kafka administration tasks. It supports the following: 
+    - Management of multiple clusters 
+    - Easy inspection of cluster state (topics, consumers, offsets, brokers, replica distribution, partition distribution)
+    - Running preferred replica election 
+    - Generation of partition assignments with the option to select which broker are used. 
+    - Running reassignment of partitions (based on generated assignments) 
+    - Creation of topics, including optional topic-specific configuration 
+    - Deletion of topics (delete.topic.enable=true must be set in the broker configurations) 
+    - Batch generation of partition assignments for multiple topics with the option to select which brokers are used.
+    - Batch running the reassignment of partitions for multiple topics 
+    - Add partitions to an existing topic 
+    - Update the configuration of an existing topic 
+    - Collect broker and topic level metrics using JMX 
+
+# KAFKA_MANAGER 
+docker-compose.yml 
+once again docker-compose will be used to deploy and run kafka Manager. 
+
+
+version: '3'
+services:
+  kafka_manager:
+    image: hlebalbau/kafka-manager:2.0.0.2
+    container_name: kafka-manager
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 9000:9000    environment:
+      ZK_HOSTS: '192.2.0.11:2181,192.2.0.12:2181,192.2.0.13:2181'
+      APPLICATION_SECRET: "MySecret"    
+      command: -Dpidfile.path=/dev/null
+
+
+As Kafka Manager also stores information in Zookeeper, the key setting is to specify the Zookeeper ensemble to which to connect. 
+
+ZK_HOSTS: '192.2.0.11:2181, 192.2.0.12:2181,192.2.0.13:2181' 
+
+# Running the Kafka Manager 
+Kafka Manager is started using docker-compose as follows: 
+
+docker-compose -f PATH/TO/docker-compose.yml up -d 
+
+The -d flag will cause the container to be run in the background as a daemon. 
+
+# Add The Cluster 
+When first connecting to Kafka Manager, there will not yet be any Kafka clusters specified. 
+
+Select Cluster -> Add Cluster 
+The Add Cluster page prompts you to provide a Cluster Name and the Zookeeper hosts used by the Kafka cluster. You can also enable JMX polling of broker and topic metrics. 
+
+After saving the cluster settings, you should see as the Done! message. 
+
+The cluster that was added should now appear on the main page. 
+
+- Clicking on the cluster name will provide summary of the cluster. 
+
+- You can drill-down into more detailed information, about the brokers that make up the cluster. 
+
+- As well as topics within the cluster 
+
+Wrapping up Hopefully story will helped you to understand how to deploy a multi-broker kafka cluster based on the 
+Confluent Platform OSS distribution. 
+
+In the future I hope to publish additional stories about various use-cases for Kafka, including the use of connectors, KSQL and Kafka Streams. 
+
+medium link: https://medium.com/@robcowart/deploying-confluent-platform-kafka-oss-using-docker-39b65fa6809b

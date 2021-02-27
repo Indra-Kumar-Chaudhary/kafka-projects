@@ -1,0 +1,14 @@
+version: '3' 
+services:
+  kafka_manager:
+    image: hlebalbau/kafka-manager:2.0.0.2 
+    container_name: kafka-manager 
+    restart: unless-stopped 
+    network_mode: bridge 
+    ports:
+      - 9000:9000 
+    enviroment:
+      ZK_HOSTS: '192.2.0.11:2181, 192.2.0.12:2181' 
+      APPLICATION_SECRET: 'mySecret'
+    
+    command: -Dpidfile.path=/dev/null 
