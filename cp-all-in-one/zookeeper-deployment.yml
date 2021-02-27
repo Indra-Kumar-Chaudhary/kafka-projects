@@ -6,7 +6,7 @@ services:
     restart: unless-stopped 
     network_mode: host 
 
-    volumes:
+    #volumes:
       #- /var/lib/zookeeper/data:/var/lib/zookeeper/data 
       #- /var/lib/zookeeper/log:/var/lib/zookeeper/log 
       #- /var/log/zookeeper:/var/log/zookeeper 
