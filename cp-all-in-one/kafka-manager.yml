@@ -6,11 +6,11 @@ services:
     restart: unless-stopped 
     network_mode: bridge 
     ports:
-      - 9000:9000 
+      - '9000:9000' 
     enviroment:
-      ZK_HOSTS: '192.2.0.11:2181, 192.2.0.12:2181' 
+      ZK_HOSTS: '202.51.74.184:2181' 
       APPLICATION_SECRET: 'mySecret'
     
     command: -Dpidfile.path=/dev/null 
   
-    
+
