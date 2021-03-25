@@ -35,7 +35,7 @@ services:
     depends_on:
       - zookeeper 
     ports:
-      - "29092:29093" 
+      - "29093:29093" 
     environment:
       KAFKA_BROKER_ID: 102 
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181' 
@@ -89,4 +89,4 @@ services:
     volumes:
       - ./src:/opt/app/src 
       - ./test:/opt/app/test 
-      
+
