@@ -1,0 +1,40 @@
+# Console producer 
+kafka-console-producer --topic example-topic --boostrap-server broker:9092\
+    --property parse.key=true\
+    --property key.separator=":"
+
+# Console consumer 
+kafka-console-consumer --topic example-topic --bootstrap-server broker:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --property key.separator="-" 
+
+
+# Create a topic 
+docker-compose exec broker kafka-topics --create --topic example-topic --bootstrap-server broker:9092 --replication-factor 1 --partitions 1 
+
+# Start a console consumer 
+docker-compose exec broker bash 
+    kafka-console-consumer --topic example-topic --bootstrap-server broker:9092 (within a terminal) 
+
+# Produce your first records 
+docker-compose exec broker bash 
+
+from inside the second terminal on the broker container, run the following command 
+
+kafka-console-producer --topic example-topic --bootstrap-server broker:9092 
+
+# Start a new consumer to read all records 
+kafka-console-consumer --topic example-topic --bootstrap-server broker:9092 --from-beginning 
+
+# Producer records with full key-value pairs 
+kafka-console-producer --topic example-topic --bootstrap-server broker:9092 \ 
+    --property parse.key=true \ 
+    --property key.separator=":" 
+
+# Start a consumer to show full key-value pairs 
+kafka-console-consumer --topic example-topic --bootstrap-server broker:9092 \ 
+    --from-beginning \
+    --property print.key=true \
+    --property key.separator="-" 
+    
