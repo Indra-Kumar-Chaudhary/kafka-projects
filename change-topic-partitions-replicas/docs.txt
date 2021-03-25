@@ -1,0 +1,21 @@
+docker-compose up -d 
+
+# 1 Create the original topic 
+- first step to create the original kafka topic. Use the following command to create the topic topic1 with partition and replica: 
+docker-compose exec kafka-topics --bootstrap-server broker:9092 --topic topic1 --create --replication-factor 1 --partitions 1 
+
+# 2 Describe the original topic 
+- Describe the properties of topic that you just created. 
+docker-compose exec broker kafka-topics --bootstrap-server broker:9092 --topic topic1 --describe 
+
+Notice that the topic has 1 partition numbered 0, and 1 replica on a broker with an id of 101 (or 102) 
+
+# 3 Write the program interactively using the CLI 
+- To begin developing interactively, open up the ksqlDB CLI: 
+docker exec -it ksqldb-cli ksql http://ksqldb-server:8088 
+
+First, we'll need to create a ksqlDB stream for the original topic toic1 -let's call them stream s1. The statement below specifies the message values serialization format is JSON but in your environment, 
+VALUE_FORMAT should be set to match the serialization format of your original topic. 
+
+
+CREATE STREAM S1 (COLUMN0 VARCHAR KEY, COLUMN1 VARCHAR) WITH (KAFKA_TOPIC = 'topic1', VALUE_FORMAT= 'JSON');
