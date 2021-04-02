@@ -9,7 +9,8 @@ services:
             - "5437:5432"
         environment:
             POSTGRES_USER: postgres-user 
-            POSTGRES_PASSWORD: postgres-pw 
+            POSTGRES_PASSWORD: postgres-pw
+            POSTGRES_DB: customers 
         volumes:
-            - ./postgres/custom-config.conf:/etc/postgresql/postgres.conf 
-        command: postgres -c config_file=/etc/postgresql/postgresql.conf 
+            - "./postgres/custom-config.conf:/etc/postgresql/postgres.conf"
+        #command: postgres -c config_file=/etc/postgresql/postgresql.conf 
